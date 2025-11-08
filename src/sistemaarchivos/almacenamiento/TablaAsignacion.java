@@ -90,4 +90,36 @@ public class TablaAsignacion {
         }
         return false; // No encontrado
     }
+    
+    public EntradaTabla getCabeza() {
+    return cabeza;
+    }
+
+    public int getCantidadArchivos() {
+        return cantidadArchivos;
+    }
+
+    // Método para obtener una representación de los datos para el JTable
+    public String[][] obtenerDatosTabla() {
+        String[][] datos = new String[this.cantidadArchivos][5]; // 5 columnas
+        EntradaTabla actual = this.cabeza;
+        int i = 0;
+
+        while (actual != null && i < this.cantidadArchivos) {
+            datos[i][0] = actual.archivo.getNombre();                                 // Nombre [cite: 60]
+            datos[i][1] = String.valueOf(actual.archivo.getTamanoBloques());           // Cantidad de bloques [cite: 61]
+
+            // Dirección del primer bloque [cite: 62]
+            datos[i][2] = actual.archivo.getPrimerBloque() != null 
+                        ? String.valueOf(actual.archivo.getPrimerBloque().getId()) 
+                        : "N/A";
+
+            datos[i][3] = actual.archivo.getProcesoCreador().getId();                 // Proceso que lo creó
+            datos[i][4] = actual.archivo.getColorRepresentacion();                     // Color (si se usa) [cite: 63]
+
+            actual = actual.siguiente;
+            i++;
+        }
+        return datos;
+    }
 }
