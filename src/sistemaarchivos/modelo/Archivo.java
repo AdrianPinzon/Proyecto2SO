@@ -54,7 +54,6 @@ public class Archivo extends NodoSistema {
 
     /**
      * Establece el primer bloque de la cadena del archivo.
-     * Esto se hace después de que la SimulacionDisco ha encontrado y asignado el primer bloque.
      */
     public void setPrimerBloque(Bloque primerBloque) {
         this.primerBloque = primerBloque;
