@@ -64,6 +64,7 @@ public class PanelJTree extends JPanel {
 
         return nodoSwing;
     }
+    }   
     
     /**
     * Refresca la vista del árbol completamente.

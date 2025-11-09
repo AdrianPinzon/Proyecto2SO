@@ -86,8 +86,7 @@ public class SistemaArchivos {
            switch (solicitud.getTipoOperacion()) {
                case SolicitudES.OP_CREAR:
                    // Lógica de creación: buscar el padre, verificar espacio y llamar a discoSD.asignarBloques()
-                   // ...
-                   break;
+                   System.out.println("Ejecutando CREAR para solicitud en posición: " + solicitud.getPosicionDisco());                   break;
                case SolicitudES.OP_ELIMINAR:
                    // Lógica de eliminación: buscar el archivo, llamar a discoSD.liberarBloques() y tablaAsignacion.desregistrarArchivo()
                    // ...
@@ -102,6 +101,107 @@ public class SistemaArchivos {
            // ...
        }
    }
+   
+   // Dentro de la clase SistemaArchivos
+
+    /**
+     * Método de alto nivel para crear un Archivo o Directorio.
+     * @param nombre Nombre del nuevo nodo.
+     * @param padre Directorio contenedor.
+     * @param esDirectorio True si es Directorio, false si es Archivo.
+     * @param tamanoBloques Tamaño (solo para archivos).
+     * @param procesoCreador Proceso que ejecuta la operación.
+     * @return El nodo creado, o null si falla.
+     */
+    public NodoSistema crearNodoSistema(String nombre, Directorio padre, boolean esDirectorio, int tamanoBloques, Proceso procesoCreador) {
+
+        // 1. VERIFICAR PERMISOS (Requisito del Proyecto)
+        [cite_start]// El modo usuario está restringido a solo lectura[cite: 12].
+        if (!manejadorUsuarios.esAdministrador()) {
+            System.out.println("CREACIÓN FALLIDA: Solo el Administrador puede crear nodos.");
+            return null;
+        }
+
+        // 2. VERIFICAR EXISTENCIA (Evitar duplicados en el mismo directorio)
+        if (padre.buscarHijo(nombre) != null) {
+            System.out.println("CREACIÓN FALLIDA: Ya existe un nodo con el nombre '" + nombre + "'.");
+            return null;
+        }
+
+        NodoSistema nuevoNodo = null;
+
+        if (esDirectorio) {
+            // La creación de Directorios es lógica y no requiere E/S de disco
+            nuevoNodo = new Directorio(nombre, padre, procesoCreador.getTipoUsuario());
+            padre.agregarHijo(nuevoNodo);
+            System.out.println("Directorio creado exitosamente: " + nombre);
+
+        } else { // Creación de Archivo (Requiere asignación de bloques y E/S)
+
+            // 3. VERIFICAR ESPACIO EN DISCO
+            if (tamanoBloques <= 0 || tamanoBloques > discoSD.getBloquesLibres()) {
+                System.out.println("CREACIÓN FALLIDA: Tamaño inválido o espacio insuficiente.");
+                return null;
+            }
+
+            // 4. CREAR EL OBJETO ARCHIVO Y ENCOLAR LA SOLICITUD
+            Archivo nuevoArchivo = new Archivo(nombre, padre, procesoCreador.getTipoUsuario(), tamanoBloques, procesoCreador);
+
+            // Creamos la Solicitud E/S para la asignación de bloques (E/S Lenta)
+            SolicitudES solicitud = new SolicitudES(
+                SolicitudES.OP_CREAR, 
+                padre.getNombre() + "/" + nombre, 
+                tamanoBloques
+            );
+
+            // 5. ENCOLAR LA SOLICITUD
+            procesoCreador.setSolicitud(solicitud);
+            procesoCreador.setEstado(Proceso.BLOQUEADO);
+            colaES.encolar(solicitud);
+
+            System.out.println("Solicitud de CREACIÓN encolada para Archivo: " + nombre);
+            nuevoNodo = nuevoArchivo;
+        }
+
+        // Si la creación es encolada (Archivo), la agregación al padre se hace DENTRO
+        // del método 'atenderSolicitudCREAR' (ver paso 2).
+
+        return nuevoNodo;
+    }
+    
+    // Dentro de la clase SistemaArchivos
+
+    /**
+     * Ejecuta la operación de asignación de bloques y finaliza la creación del Archivo.
+     * Este método simula la operación real de E/S de bajo nivel.
+     * @param archivo El objeto Archivo que ya está en espera.
+     */
+    public boolean atenderSolicitudCREAR(Archivo archivo, Directorio padre) {
+
+        // 1. ASIGNACIÓN DE BLOQUES FÍSICA
+        boolean exitoAsignacion = discoSD.asignarBloques(archivo);
+
+        if (exitoAsignacion) {
+            // 2. AGREGAR AL PADRE (se hace aquí porque la asignación de bloques fue exitosa)
+            padre.agregarHijo(archivo);
+
+            // 3. REGISTRAR EN METADATOS
+            tablaAsignacion.registrarArchivo(archivo);
+
+            // 4. FINALIZAR PROCESO (marcarlo como TERMINADO o LISTO)
+            archivo.getProcesoCreador().setEstado(Proceso.TERMINADO);
+
+            // 5. Notificar a la GUI
+            // Notificar a PanelJTree, PanelDisco, PanelTablas para que llamen a 'actualizarVista()'
+
+            return true;
+        } else {
+            // Manejar error de disco (aunque ya se verificó antes, es una doble verificación)
+            archivo.getProcesoCreador().setEstado(Proceso.TERMINADO); // Falla, pero termina
+            System.out.println("ERROR DE DISCO: Falló la asignación de bloques durante la E/S.");
+            return false;
+        }
+    }
    
     public Directorio getDirectorioRaiz() {
     return directorioRaiz;

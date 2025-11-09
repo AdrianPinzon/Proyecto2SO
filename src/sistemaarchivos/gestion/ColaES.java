@@ -81,6 +81,42 @@ public class ColaES {
         this.tamano--;
         return solicitudSaliente;
     }
+    
+    /**
+    * Remueve una solicitud específica de la cola, buscándola por referencia.
+    * Este método es usado por el PlanificadorDisco para ejecutar políticas no-FIFO.
+    * @param solicitudAEliminar La SolicitudES a remover.
+    */
+   public void removerSolicitud(SolicitudES solicitudAEliminar) {
+       if (this.frente == null) {
+           return; // Cola vacía
+       }
+
+       // Caso 1: La solicitud a eliminar es la cabeza (frente)
+       if (this.frente.solicitud == solicitudAEliminar) {
+           this.frente = this.frente.siguiente;
+           if (this.frente == null) {
+               this.finalCola = null;
+           }
+           this.tamano--;
+           return;
+       }
+
+       // Caso 2: Buscar y remover en medio
+       NodoCola actual = this.frente;
+       while (actual.siguiente != null) {
+           if (actual.siguiente.solicitud == solicitudAEliminar) {
+               // Encontrado: Saltamos el nodo, enlazando el actual al siguiente del siguiente
+               actual.siguiente = actual.siguiente.siguiente;
+               if (actual.siguiente == null) {
+                   this.finalCola = actual; // Actualizar el final si eliminamos el último nodo
+               }
+               this.tamano--;
+               return;
+           }
+           actual = actual.siguiente;
+        }
+   }
 
     // Getters esenciales
     public int getTamano() {
