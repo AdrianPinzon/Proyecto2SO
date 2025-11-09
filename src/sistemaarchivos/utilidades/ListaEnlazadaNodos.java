@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package sistemaarchivos.utilidades;
 
 import sistemaarchivos.modelo.NodoSistema;
@@ -34,51 +30,61 @@ public class ListaEnlazadaNodos {
     
     // Dentro de la clase ListaEnlazadaNodos
 
-/**
- * Agrega un nuevo nodo al final de la lista.
- * @param nuevoNodo El NodoSistema (Archivo o Directorio) a agregar.
- */
-public void agregar(NodoSistema nuevoNodo) {
-    NodoLista nuevo = new NodoLista(nuevoNodo);
-
-    if (this.cabeza == null) {
-        // La lista está vacía, el nuevo nodo es la cabeza
-        this.cabeza = nuevo;
-    } else {
-        // Recorrer hasta el último nodo
-        NodoLista actual = this.cabeza;
-        while (actual.siguiente != null) {
-            actual = actual.siguiente;
-        }
-        // Enganchar el nuevo nodo al final
-        actual.siguiente = nuevo;
-    }
-    this.tamano++;
-}
-
     /**
-     * Busca un NodoSistema por su nombre.
-     * @param nombre El nombre del nodo a buscar.
-     * @return El NodoSistema si se encuentra, o null.
+     * Agrega un nuevo nodo al final de la lista.
+     * @param nuevoNodo El NodoSistema (Archivo o Directorio) a agregar.
      */
-    public NodoSistema buscar(String nombre) {
-        NodoLista actual = this.cabeza;
+    public void agregar(NodoSistema nuevoNodo) {
+        NodoLista nuevo = new NodoLista(nuevoNodo);
 
-        while (actual != null) {
-            if (actual.dato.getNombre().equals(nombre)) {
-                return actual.dato; // Encontrado
+        if (this.cabeza == null) {
+            // La lista está vacía, el nuevo nodo es la cabeza
+            this.cabeza = nuevo;
+        } else {
+            // Recorrer hasta el último nodo
+            NodoLista actual = this.cabeza;
+            while (actual.siguiente != null) {
+                actual = actual.siguiente;
             }
-            actual = actual.siguiente;
+            // Enganchar el nuevo nodo al final
+            actual.siguiente = nuevo;
         }
-        return null; // No encontrado
+        this.tamano++;
     }
 
-    // Getters esenciales
-    public int getTamano() {
-        return tamano;
-    }
+        /**
+         * Busca un NodoSistema por su nombre.
+         * @param nombre El nombre del nodo a buscar.
+         * @return El NodoSistema si se encuentra, o null.
+         */
+        public NodoSistema buscar(String nombre) {
+            NodoLista actual = this.cabeza;
 
-    public NodoLista getCabeza() {
-        return cabeza;
-    }
+            while (actual != null) {
+                if (actual.dato.getNombre().equals(nombre)) {
+                    return actual.dato; // Encontrado
+                }
+                actual = actual.siguiente;
+            }
+            return null; // No encontrado
+        }
+        
+        /**
+        * Retorna la cabeza de la lista (el primer NodoLista). 
+        * Esto permite que las clases externas (como Directorio o PanelJTree) 
+        * puedan iterar la lista manualmente sin usar java.util.Iterator.
+        * @return El primer NodoLista, o null si la lista está vacía.
+        */
+       public NodoLista getPrimerNodo() {
+           return cabeza;
+       }
+
+        // Getters esenciales
+        public int getTamano() {
+            return tamano;
+        }
+
+        public NodoLista getCabeza() {
+            return cabeza;
+        }
 }

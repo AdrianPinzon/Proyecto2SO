@@ -51,8 +51,17 @@ public class Directorio extends NodoSistema {
     public int getTamano() {
         int tamanoTotal = 0;
         
-        // El tamaño de un directorio es la suma de los tamaños de sus hijos (recursivamente)
-                
+        // Usar el método getPrimerNodo() de nuestra lista enlazada para iniciar la iteración
+        NodoLista actual = listaDeHijos.getPrimerNodo();
+
+        // Iterar manualmente sobre la lista de hijos
+        while (actual != null) {
+            // Llamada recursiva: si es un directorio, suma su tamaño interno. Si es un archivo, suma sus bloques.
+            tamanoTotal += actual.getDato().getTamano(); 
+
+            // Mover al siguiente nodo
+            actual = actual.getSiguiente();
+        }                
         return tamanoTotal; 
     }
 
