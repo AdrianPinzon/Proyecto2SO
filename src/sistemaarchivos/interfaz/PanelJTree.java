@@ -47,13 +47,18 @@ public class PanelJTree extends JPanel {
         if (nodoSistema instanceof Directorio) {
             Directorio dir = (Directorio) nodoSistema;
 
-            // **NOTA**: Aquí se necesita un método de iteración en ListaEnlazadaNodos 
-            // para recorrer sus hijos (Archivos y Directorios).
+            // Obtenemos el primer nodo de nuestra Lista Enlazada
+            NodoLista actual = dir.getListaDeHijos().getPrimerNodo();
 
-            // Simulación de iteración:
-            // for (NodoSistema hijo : dir.getListaDeHijos()) {
-            //     nodoSwing.add(crearNodoRecursivo(hijo));
-            // }
+            // Iteramos manualmente sobre la estructura de datos propia
+            while (actual != null) {
+                NodoSistema hijo = actual.getDato();
+
+                // Llamada recursiva: construir el sub-árbol del hijo
+                nodoSwing.add(crearNodoRecursivo(hijo));
+
+                // Mover al siguiente nodo en la lista enlazada
+                actual = actual.getSiguiente();
         }
         // Para el Archivo (que no tiene hijos), simplemente retorna el nodo.
 
